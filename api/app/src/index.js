@@ -6,15 +6,14 @@ const app = express();
 const port = 9001;
 
 const conn = mysql.createConnection({
-    host : "172.17.0.2"
+    host : "localhost"
     ,port : 3306
     ,user : "root"
     ,password : "root"
+    ,database : "mydb"
 });
 
-console.log(conn.stream['connecting'])
-
-
+console.log(conn)
 
 app.listen(port, (err) => {
     if (! err) {
@@ -23,5 +22,17 @@ app.listen(port, (err) => {
 });
 
 app.get("/", (req, res, err) => {
-    res.send('Olá, você está na raiz do docker introdução!');
+    res.status(200).send('Olá, você está na raiz do docker introdução!');
 });
+
+app.get("/products", (req, res, error) => {
+    conn.query("select * from products order by name", (err, result, fields) => {
+        if (! err) {
+            res.status(200).send(result);
+        } else {
+            console.log(err);
+            res.status(500).send(err);
+        };
+    })
+}
+);
