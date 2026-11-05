@@ -5,8 +5,10 @@ const app = express();
 
 const port = 9001;
 
+// npm start local : localhost
+// sem o parâmetro: --link: 172.17.0.1
 const conn = mysql.createConnection({
-    host : "localhost"
+    host : "mysql-container"
     ,database : "mydb"
     ,port : 3306
     ,user : "root"
@@ -28,7 +30,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/product", (req, res) => {
-    const sql = "select * from product";
+    const sql = "select * from products order by id";
     conn.query(sql, (err, result, fields) => {
         if (! err) {
             res.status(200).send(result.map(item => ({ id : item.id, produto : item.name, valor : item.price, ativo : "sim"})));

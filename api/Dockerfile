@@ -1,4 +1,14 @@
-FROM node:10-slim
+FROM node:22-slim
+RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
 WORKDIR /home/node/app
-#RUN npm install --save express
-CMD ["node", "src/index.js"]
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+USER node
+
+EXPOSE 9001
+
+CMD ["npm", "start"]
