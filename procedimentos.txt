@@ -12,6 +12,6 @@ No diretório app:
 
 # docker build -t node-image -f ..\Dockerfile .
 # docker run -d --rm --name node-container -p 9001:9001 -v d:\Docker\docker-introducao\api\app:/home/node/app --link mysql-container node-image
-
+# docker container logs <container> -f 
 
 # https://github.com/ayrtonteshima/docker-introducao
