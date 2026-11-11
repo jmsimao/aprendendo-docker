@@ -15,3 +15,7 @@ No diretório app:
 # docker container logs <container> -f 
 
 # https://github.com/ayrtonteshima/docker-introducao
+
+
+# docker compose up 
+# docker compose stop

@@ -8,7 +8,7 @@ const port = 9001;
 // npm start local : localhost
 // sem o parâmetro: --link: 172.17.0.1
 const conn = mysql.createConnection({
-    host : "mysql-container"
+    host : "mysql-cont-01"
     ,database : "mydb"
     ,port : 3306
     ,user : "root"
