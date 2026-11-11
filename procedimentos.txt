@@ -19,3 +19,4 @@ No diretório app:
 
 # docker compose up 
 # docker compose stop
+# docker compose up -d

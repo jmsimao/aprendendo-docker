@@ -8,7 +8,7 @@ const port = 9001;
 // npm start local : localhost
 // sem o parâmetro: --link: 172.17.0.1
 const conn = mysql.createConnection({
-    host : "mysql-cont-01"
+    host : "mysql-container-01"
     ,database : "mydb"
     ,port : 3306
     ,user : "root"
@@ -19,7 +19,7 @@ conn.connect()
 
 app.listen(port, (error) => {
     if (! error) {
-        console.log('Servidor no ar! Porta %d.', port);
+        console.log('Webserver back-end (node) no ar! Porta %d.\n', port);
     } else {
         console.error('Erro no servidor: %s', error)
     };
