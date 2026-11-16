@@ -1,34 +1,58 @@
 services:
-  database: 
-    image: mysql:latest 
+  database:
+    image: mysql:latest
     container_name: mysql-container-01
-    restart: always
-    volumes: 
-      - "D:\\Docker\\docker-introducao\\db\\mysql\\data:/var/lib/mysql"
-    ports: 
-      - "3306:3306"
+    restart: no # always
     environment:
-      - MYSQL_ROOT_PASSWORD=root 
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ".\\db\\mysql\\data:/var/lib/mysql"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 1m30s
       timeout: 30s
       retries: 5
       start_period: 30s
-
-  node:
-    image: node:26-slim
+  backend:
+    image: node:24-slim
     container_name: node-container-01
-    restart: always
+    restart: no
     working_dir: /home/node/app
-    volumes:
-      - "D:\\Docker\\docker-introducao\\api\\app:/home/node/app"
-    ports:
+    ports: 
       - "9001:9001"
+    volumes:
+      - ".\\api\\app:/home/node/app"  
     command: npm start
     depends_on:
       database:
         condition: service_healthy
+  website:
+    image: php:8.2-apache
+    container_name: php-container-01
+    working_dir: /var/www/html 
+    volumes:
+      - ".\\website\\html:/var/www/html"
+    ports:
+      - "8888:80"
 
 
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
