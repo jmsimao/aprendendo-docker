@@ -35,24 +35,4 @@ services:
     volumes:
       - ".\\website\\html:/var/www/html"
     ports:
-      - "8888:80"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      - "8080:80"

@@ -1,0 +1,7 @@
+FROM postgres:18.7
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=postgres
+VOLUME /var/lib/postgresql
+EXPOSE 5432
+
+

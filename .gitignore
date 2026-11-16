@@ -1,4 +1,5 @@
 api/app/node_modules/*
 api/app/package-lock.json
 db/mysql/data/*
+db1/postgresql/*
 website/bootstrap-5.3.9-dist/*

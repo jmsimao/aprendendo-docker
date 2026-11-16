@@ -1,3 +1,3 @@
 FROM php:8.2-apache
-VOLUME /var/html/www
+VOLUME /var/www/html
 EXPOSE 80

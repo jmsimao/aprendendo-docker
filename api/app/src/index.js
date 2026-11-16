@@ -9,7 +9,7 @@ const port = 9001;
 // sem o parâmetro: --link: 172.17.0.1
 // host : "mysql-container-01"
 const conn = mysql.createConnection({
-    host : "mysql-container-01"
+    host : "mysql-container"
     ,database : "mydb"
     ,port : 3306
     ,user : "root"
@@ -39,6 +39,19 @@ app.get("/product", (req, res) => {
         }
         else {
             res.status(500).json({ id : err.code, code: err.code, message : err.message, url : req.url});
+        };
+    });
+});
+
+app.get("/person", (req, res) => {
+    const sql = "select * from person order by name";
+    conn.query(sql, (error, result, fields) => {
+        if (! error) {
+            console.log(req.url.name);
+            res.status(200).json(result.map(item => ({ id: item.id, nome : item.name, email: item.email, fone: item.phone, companhia: item.company, cidade: item.city, registro: item.registered})));
+        } else
+        {
+            res.status(500).send(error.message);
         };
     });
 });
