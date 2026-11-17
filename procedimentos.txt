@@ -20,3 +20,6 @@ No diretório app:
 # docker compose up 
 # docker compose stop
 # docker compose up -d
+
+# Site:
+# https://www.luiztools.com.br/post/como-criar-um-cache-de-dados-com-redis-em-node-js/

@@ -1,3 +1,3 @@
 @echo off
 
-docker stop php-container node-container mysql-container postgres-container
+docker stop php-container node-container redis-container mysql-container postgres-container 

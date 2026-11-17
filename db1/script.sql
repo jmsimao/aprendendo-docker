@@ -1,4 +1,7 @@
-create table if not exists person(
+
+set search_path = public;
+
+create table if not exists public.person(
     id          int primary key
     ,name       varchar(60)     not null
     ,email      varchar(80)     not null
@@ -7,8 +10,6 @@ create table if not exists person(
     ,city       varchar(30)     not null
     ,registered date            not null
 );
-
-set search_path = public;
 
 INSERT INTO public.person (id, name, email, phone, company, city, registered) VALUES (1, 'Oliver Taylor', 'lucas.white36@example.com', '(393) 416-8573', 'StreamLine', 'Nashville', '2026-02-23');
 INSERT INTO public.person (id, name, email, phone, company, city, registered) VALUES (2, 'Richard Ramirez', 'alexander.smith62@example.com', '(816) 761-8315', 'NovaTech', 'Fort Worth', '2026-01-03');

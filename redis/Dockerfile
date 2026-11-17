@@ -1,0 +1,4 @@
+FROM redis:8.8.4
+WORKDIR /data
+VOLUME /data
+EXPOSE 6379
