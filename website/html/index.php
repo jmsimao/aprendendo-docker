@@ -19,8 +19,8 @@ function buscarDados(string $url): array
 }
 
 $url = "http://node-container:9001";
-$produtos = buscarDados($url . '/product');
-$pessoas = buscarDados($url . '/person');
+$produtos = buscarDados($url . '/produto');
+$pessoas = buscarDados($url . '/pessoa');
 ?>
 
 <!DOCTYPE html>
