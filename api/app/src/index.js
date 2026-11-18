@@ -26,12 +26,13 @@ const connRedis = redis.createClient({
     url : "redis://" + redisHostname + ":6379"
 });
 
-connRedis.connect();
+await connRedis.connect();
 if (! connRedis.isOpen) {
     console.error("\nBD Redis não iniciado!");
 } else {
     console.log("\nBD Redis no ar!");
 };
+const redisExpiration = 180;
 
 
 app.listen(port, (error) => {
@@ -77,7 +78,7 @@ app.get("/produto", (req, res, next) => {
 app.get("/pessoa", (req, res, next) => {
     var status = 200; var ret = {}
     const sql = "select * from person order by name;"
-    
+        
     connMySQL.connect((err) => {
         if (! err == null) {
             status = 500; res.status(status).send(mensagem.erroConexao);
@@ -107,47 +108,58 @@ app.get("/pessoa", (req, res, next) => {
 app.get("/pessoa/:id", async (req, res, next) => {
     const id = req.params.id;
     var status = 200; var ret = {}
-    const sql = "select * from person where id = ? order by name;"
-    
-    const chave = "pessoa_" + id; 
-    console.log(chave);
-    const dataRedis = await connRedis.get(chave);
-    console.log(dataRedis)
-    if (dataRedis) {
-        console.log('Lendo do Redis')
-        status = 200; ret = (dataRedis);
-        return res.status(200).json(JSON.stringify(ret));
-    } else {
-        connMySQL.connect((err) => {
-            if (! err == null) {
-                status = 500; res.status(status).send(mensagem.erroConexao);
-            } else {
-                console.log('mysql')
-                connMySQL.query(sql, [id], (err, result, fields) => {
-                    if (! err) {
-                        // console.log(fields);
-                        ret = result.map(item => (
-                            {
-                            id: item.id, 
-                            nome : item.name 
-                            ,email: item.email 
-                            ,fone: item.phone
-                            ,companhia: item.company
-                            ,cidade: item.city
-                            ,registro: item.registered 
-                            }));
+    const sql = "select * from person where id = ?"
+ 
+    const chave = req.url.substring(1).replace('/','_');
+    console.log('Redis key: ' + chave);
 
-                        if (ret.length == 0) {
-                            status = 404; ret = { "id": parseInt(id), nome : "Não localizado!"};
-                        };
-                        console.log('Pessoa' + ret);
-                        connRedis.set(chave, ret);
+    const dataRedis = await connRedis.get(chave)
+    if (dataRedis) {
+        console.log('Get data from REDIS!');
+        return res.status(status).json(JSON.parse(dataRedis));
+    } else {
+        console.log('Get data from MYSQL!');
+        connMySQL.connect((err) => {
+            if (err == null) {
+                connMySQL.query(sql, [id], (err1, result, fields) => {
+                    if (! err1) {
+                        if (result.length == 0) {
+                            status = 404; ret = { coderet: 0
+                                                ,message : "Registro não localizado!"};
+                        } else 
+                            ret = result.map(tuple => (
+                                {
+                                coderet: 1
+                                ,id: tuple.id
+                                ,nome: tuple.name
+                                ,email: tuple.email
+                                ,fone: tuple.phone
+                                ,companhia: tuple.company
+                                ,cidade: tuple.city
+                                ,registro: tuple.registered
+                        }));
+                        // Gravar em Redis.
+                        connRedis.set(chave, JSON.stringify(ret), { EX: redisExpiration })
+                        return res.status(status).json(ret);
                     } else {
-                        status = 404; ret = { "id": err.errno, "code": err.code, "message": err.message, "url": req.url };
+                        status = 500; ret = { coderet: -1
+                                             ,errno: err1.errno
+                                             ,code: err1.code
+                                             ,message: err1.message
+                                            };
                     };
                     return res.status(status).json(ret);
                 });
+            } else {
+                status = 500; ret = { coderet: -2
+                                    ,message: mensagem.erroConexao
+                                    ,errno: err.errno
+                                    ,code: err.code
+                                    ,message2: err.message
+                                    };
+                return res.status(status).json(ret);
             };
         });
     };
+
 });
