@@ -13,8 +13,8 @@ docker run -d --rm --name postgres-container -p 5433:5432 -v ".\db1\postgresql:/
 docker run -d --rm --name redis-container -p 6379:6379 -v ".\redis\data:/data" redis-image
 docker logs mysql-container
 pause
-REM docker run -d --rm --name node-container -p 9001:9001 -v ".\api\app:/home/node/app" --link mysql-container --link redis-container node-image
-REM docker run -d --rm --name php-container -p 8080:80 -v ".\website\html:/var/www/html" --link node-container php-image
+docker run -d --rm --name node-container -p 9001:9001 -v ".\api\app:/home/node/app" --link mysql-container --link redis-container node-image
+docker run -d --rm --name php-container -p 8080:80 -v ".\website\html:/var/www/html" --link node-container php-image
 
 
 docker container ps
