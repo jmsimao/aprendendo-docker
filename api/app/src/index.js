@@ -32,7 +32,7 @@ if (! connRedis.isOpen) {
 } else {
     console.log("\nBD Redis no ar!");
 };
-const redisExpiration = 180;
+const redisExpiration = 900;
 
 
 app.listen(port, (error) => {
@@ -121,12 +121,12 @@ app.get("/pessoa/:id", async (req, res, next) => {
         console.log('Get data from MYSQL!');
         connMySQL.connect((err) => {
             if (err == null) {
-                connMySQL.query(sql, [id], (err1, result, fields) => {
+                connMySQL.query(sql, [id], async (err1, result, fields) => {
                     if (! err1) {
                         if (result.length == 0) {
                             status = 404; ret = { coderet: 0
                                                 ,message : "Registro não localizado!"};
-                        } else 
+                        } else { 
                             ret = result.map(tuple => (
                                 {
                                 coderet: 1
@@ -137,10 +137,11 @@ app.get("/pessoa/:id", async (req, res, next) => {
                                 ,companhia: tuple.company
                                 ,cidade: tuple.city
                                 ,registro: tuple.registered
-                        }));
-                        // Gravar em Redis.
-                        connRedis.set(chave, JSON.stringify(ret), { EX: redisExpiration })
-                        return res.status(status).json(ret);
+                            }));
+                            // Gravar em Redis.
+                            await connRedis.set(chave, JSON.stringify(ret), { EX: redisExpiration });        
+                        };
+                    return res.status(status).json(ret);
                     } else {
                         status = 500; ret = { coderet: -1
                                              ,errno: err1.errno
