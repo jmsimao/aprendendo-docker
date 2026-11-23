@@ -1,5 +1,4 @@
 import express from "express";
-import redis, { createClient, RedisClient } from "redis";
 import routes from "./route/routes.js";
 
 const app = express();

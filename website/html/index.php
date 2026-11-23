@@ -18,7 +18,7 @@ function buscarDados(string $url): array
     return is_array($dados) ? $dados : [];
 }
 
-$url = "http://node-container:9001";
+$url = "http://node-container-01:9001";
 $produtos = buscarDados($url . '/produto');
 $pessoas = buscarDados($url . '/pessoa');
 ?>
