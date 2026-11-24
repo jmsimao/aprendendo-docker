@@ -1,7 +1,7 @@
 
 set search_path = public;
 
-create table if not exists public.person(
+create table public.person(
     id          int primary key
     ,name       varchar(60)     not null
     ,email      varchar(80)     not null
