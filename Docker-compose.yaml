@@ -6,7 +6,7 @@ services:
     container_name: mysql-container-01    
     restart: no # always
     environment:
-      - MYSQL_ROOT_PASSWORD=mysql  
+      - MYSQL_ROOT_PASSWORD=root 
     volumes:
       - ".\\db\\mysql\\data:/var/lib/mysql"
     ports:
@@ -31,7 +31,7 @@ services:
       - "5435:5432"
     healthcheck:
       test: ["CMD", "pg_isready", "-d", "postgres"]
-      interval: 1m30s
+      interval: 60s
       timeout: 30s
       retries: 5
       start_period: 30s

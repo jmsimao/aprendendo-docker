@@ -4,7 +4,7 @@ async function mySQL_db() {
     try {
         const connMySQL = mysql.createConnection({
             // host: "localhost"
-             host: "mysql-container-01"
+            host: "mysql-container-01"
             ,port : 3306
             ,database: "mydb"
             ,user: "root"

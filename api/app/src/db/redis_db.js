@@ -4,7 +4,7 @@ async function redis_db() {
 
     const connRedis = redis.createClient({
         url: "redis://redis-container-01:6379" 
-        // url: "redis://localhost:6379"
+        //url: "redis://localhost:6379"
     });
 
     await connRedis.connect()
