@@ -1,5 +1,6 @@
 api/app/node_modules/*
 api/app/package-lock.json
+/api/app/.env
 db/mysql/data/*
 db1/postgresql/*
 redis/data/*

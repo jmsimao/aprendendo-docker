@@ -1,9 +1,12 @@
 import mySQL_db from "../../db/mysql_db.js";
 import redis_db from "../../db/redis_db.js";
+import { redisKey } from "../../shared/utils/function.js";
 import mensagem from "../../shared/utils/mensagem.js";
+import "dotenv/config";
 
 async function getProduto(req, res, next) {
     var status = 200; var data = {};
+    const _env = process.env;
     const sql = "select * from products p order by p.name;";
 
     const connMySQL = await mySQL_db();
@@ -22,9 +25,14 @@ async function getProduto(req, res, next) {
                     }));
                     console.log("get data from db...");
 
-                    const chaveRedis = req.url.toString().substring(1).replace('/','_');
-                    //console.log(chaveRedis);
-                    connRedis.set(chaveRedis, JSON.stringify(data), { EX : 300 });
+                    const key = redisKey(req.url);
+                    connRedis.set(key, JSON.stringify(data), { EX : _env.REDIS_EXPIRE })
+                        .then((onfulfilled) => {
+                            console.log(`Redis key: ${key}, cache return: ${onfulfilled}.\n`);
+                        })
+                        .catch((onrejected) => {
+                            console.error(`Redis key: ${key}, Rejected: ${onrejected}.\n`);
+                        });
                 } else {
                     status = 500; data = { 
                                         codret: -1

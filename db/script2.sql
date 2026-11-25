@@ -1,14 +1,13 @@
-
 use mydb;
 
 create table if not exists person(
-    id          int auto_increment primary key
-    ,name       varchar(60)     not null
-    ,email      varchar(80)     not null
-    ,phone		varchar(30)		not null
-    ,company    varchar(120)    not null
-    ,city       varchar(30)     not null
-    ,registered date            not null
+    id              int             auto_increment primary key
+    ,name           varchar(60)     not null
+    ,email          varchar(80)     not null
+    ,phone		    varchar(30)		not null
+    ,company        varchar(120)    not null
+    ,city           varchar(30)     not null
+    ,registered     date            not null
 );
 
 INSERT INTO person (id, name, email, phone, company, city, registered) VALUES (1, 'Oliver Taylor', 'lucas.white36@example.com', '(393) 416-8573', 'StreamLine', 'Nashville', '2026-02-23');
