@@ -16,7 +16,7 @@ async function getPessoa(req, res, next) {
         //console.log(err);
         if (err == null) {
             console.time('nocache');
-            connMySQL.query(sql, (errq, result, fields) => {
+            connMySQL.query(sql, async (errq, result, fields) => {
                 if (! errq) {
                     data = result.map(tuple => ({
                          codret: 1
@@ -32,12 +32,12 @@ async function getPessoa(req, res, next) {
                     console.log("get data from db...");
                     
                     const key = redisKey(req.url);
-                    connRedis.set(key, JSON.stringify(data), { EX : _env.REDIS_EXPIRE })
+                    await connRedis.set(key, JSON.stringify(data), { EX : _env.REDIS_EXPIRE })
                         .then((onfulfilled) => {
-                            console.log(`Redis key: ${key}, cache return: ${onfulfilled}.\n`);
+                            console.log(`Save to redis key: ${key}, cache return: ${onfulfilled}.\n`);
                         })
                         .catch((onrejected) => {
-                            console.error(`Redis key: ${key}, Rejected: ${onrejected}.\n`);
+                            console.error(`Error redis key: ${key}, Rejected: ${onrejected}.\n`);
                         });
                 } else {
                     status = 500; data = { 
@@ -86,7 +86,7 @@ async function getPessoaId(req, res, next) {
     
     connMySQL.connect((err) => {
         if (err == null) {
-            connMySQL.query(sql, [id], (errq, result, fields) => {
+            connMySQL.query(sql, [id], async (errq, result, fields) => {
                 if (! errq) {
                     if (result.length !== 0) {
                         data = result.map(tuple => ({
@@ -102,12 +102,12 @@ async function getPessoaId(req, res, next) {
                         console.log("get data from db...");
 
                         const key = redisKey(req.url);
-                        connRedis.set(key, JSON.stringify(data), { EX : _env.REDIS_EXPIRE })
+                        await connRedis.set(key, JSON.stringify(data), { EX : _env.REDIS_EXPIRE })
                         .then((onfulfilled) => {
-                            console.log(`Redis key: ${key}, cache return: ${onfulfilled}.\n`);
+                            console.log(`Save to redis key: ${key}, cache return: ${onfulfilled}.\n`);
                         })
                         .catch((onrejected) => {
-                            console.error(`Redis key: ${key}, Rejected: ${onrejected}.\n`);
+                            console.error(`Error redis key: ${key}, Rejected: ${onrejected}.\n`);
                         });
                     } else {
                         status = 404; data = { codret: 0, mensagem: "Registro não encontrado!" };
@@ -147,19 +147,30 @@ async function getPessoaIdCache(req, res, next) {
 
 async function postPessoa(req, res, next) {
     var status = 200; var data = {};
+    const _env = process.env;
 
     const connMySQL = await mySQL_db();
     const dml = "insert into person(name, email, phone, company, city, registered) values (?,?,?,?,?,?)";
 
-    connMySQL.connect(async(err) => {
+    connMySQL.connect(async (err) => {
         if (err == null)  {
             const { name, email, phone, company, city, registered } = req.body;
          
             connMySQL.query(dml, [ name, email, phone, company, city, registered ], 
-                (errq, result, fields) => {
+                async (errq, result, fields) => {
                     if (! errq) {
                         data = { codret: 1, insertId: result.insertId, affectedRows: result.affectedRows, url: req.url, method: req.method };
                         console.log(data);
+
+                        const connRedis = await redis_db();
+                        const key = redisKey(req.url + '_' + result.insertId.toString());
+                        await connRedis.set(key, JSON.stringify(req.body), { EX : _env.REDIS_EXPIRE})
+                            .then((onfulfilled) => {
+                                console.log(`Save to redis key: ${key}, cache return: ${onfulfilled}.\n`);
+                            })
+                            .catch((onrejected) => {
+                                console.error(`Error redis key: ${key}, Rejected: ${onrejected}.\n`);
+                            });
                     } else {
                         status = 500; data = { 
                                         codret: -1
@@ -180,5 +191,48 @@ async function postPessoa(req, res, next) {
     });
 };
 
-export { getPessoa, getPessoaCache, getPessoaId, getPessoaIdCache, postPessoa };
+async function deletePessoaId(req, res, next) {
+    var status = 200; var data = {};
+    const sql = "select p.id, p.name from person p where p.id = ?";
+    const dml = "delete from person p where p.id = ?";
+
+    const { id } = req.params;
+
+    const connMySQL = await mySQL_db();
+    connMySQL.connect(async (err) => {
+        if (err == null) {
+            connMySQL.query(sql, [ id ], async (errq, result, fields) => {
+                if (! errq) {
+                    if (result.length > 0) {
+                        data = result.map((tuple => ({ id: tuple.id, nome: tuple.name})));
+                    } else {
+                        status = 404; data = { 
+                                        codret: -1
+                                        ,mensagem: "Registro não localizado!"
+                                        ,id: id 
+                                        ,errno: 404
+                                        ,name: "Not found"
+                                        };
+                    };
+                } else {
+                    status = 404; data = { 
+                                        codret: -1
+                                        ,mensagem: errq.message
+                                        ,code: errq.code
+                                        ,errno: errq.errno
+                                        ,name: errq.name
+                                        ,sqlState: errq.sqlState
+                                    };
+                };
+                return res.status(status).json(data);
+            });
+        } else {
+            status = 500; data = { codret: -2, mensagem: mensagem.erroConexao };
+            console.log(data);
+            return res.status(status).json(data);
+        };
+    });
+};
+
+export { getPessoa, getPessoaCache, getPessoaId, getPessoaIdCache, postPessoa, deletePessoaId };
 // eof

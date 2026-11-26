@@ -79,3 +79,6 @@ services:
       - "8080:80"
 
 #eof
+## Caso erro na porta 6379 do redis, execute:
+## net stop winnat
+## net start winnat

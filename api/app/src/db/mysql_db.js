@@ -12,12 +12,12 @@ async function mySQL_db() {
             ,user: _env.MYSQL_USER
             ,password: _env.MYSQL_PASSWORD
             });
-        console.log(_env.MYSQL_MENS_CONEXAO_OK);
+        console.log('[!]', _env.MYSQL_MENS_CONEXAO_OK);
 
         return connMySQL;
     }
     catch (error) {
-        console.error(error);
+        console.error('[x] ', error);
         return null;
     }; 
 };

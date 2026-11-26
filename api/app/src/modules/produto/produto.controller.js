@@ -12,6 +12,8 @@ async function getProduto(req, res, next) {
     const connMySQL = await mySQL_db();
     const connRedis = await redis_db();
 
+    console.log(connRedis)
+
     connMySQL.connect((err) => {
         if (err == null) {
             connMySQL.query(sql, (errq, result, fields) => {
