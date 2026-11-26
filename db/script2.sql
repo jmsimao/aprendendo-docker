@@ -10,6 +10,8 @@ create table if not exists person(
     ,registered     date            not null
 );
 
+alter table person modify column registered datetime default now();
+
 INSERT INTO person (id, name, email, phone, company, city, registered) VALUES (1, 'Oliver Taylor', 'lucas.white36@example.com', '(393) 416-8573', 'StreamLine', 'Nashville', '2026-02-23');
 INSERT INTO person (id, name, email, phone, company, city, registered) VALUES (2, 'Richard Ramirez', 'alexander.smith62@example.com', '(816) 761-8315', 'NovaTech', 'Fort Worth', '2026-01-03');
 INSERT INTO person (id, name, email, phone, company, city, registered) VALUES (3, 'Karen Miller', 'susan.lopez17@example.com', '(901) 215-5758', 'PrimeTech', 'Austin', '2024-02-29');

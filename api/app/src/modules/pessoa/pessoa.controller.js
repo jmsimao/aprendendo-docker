@@ -63,10 +63,10 @@ async function getPessoaCache(req, res, next) {
     var status = 200
     
     const connRedis = await redis_db();
-    console.time('cache');
+    console.time('inCache');
     const data = await connRedis.get(redisKey(req.url));
+    console.timeEnd('inCache');
     if (data) {
-        console.timeEnd('cache');
         console.log('get data from cache...\n')
         return res.status(status).json(JSON.parse(data));
     } else {
@@ -145,5 +145,40 @@ async function getPessoaIdCache(req, res, next) {
     };
 };
 
-export { getPessoa, getPessoaCache, getPessoaId, getPessoaIdCache };
+async function postPessoa(req, res, next) {
+    var status = 200; var data = {};
+
+    const connMySQL = await mySQL_db();
+    const dml = "insert into person(name, email, phone, company, city, registered) values (?,?,?,?,?,?)";
+
+    connMySQL.connect(async(err) => {
+        if (err == null)  {
+            const { name, email, phone, company, city, registered } = req.body;
+         
+            connMySQL.query(dml, [ name, email, phone, company, city, registered ], 
+                (errq, result, fields) => {
+                    if (! errq) {
+                        data = { codret: 1, insertId: result.insertId, affectedRows: result.affectedRows, url: req.url, method: req.method };
+                        console.log(data);
+                    } else {
+                        status = 500; data = { 
+                                        codret: -1
+                                        ,mensagem: errq.message
+                                        ,code: errq.code
+                                        ,errno: errq.errno
+                                        ,name: errq.name
+                                        ,sqlState: errq.sqlState
+                                    };
+                    };
+                    return res.status(status).json(data);    
+                });
+        } else {
+            status = 500; data = { codret: -2, mensagem: mensagem.erroConexao };
+            console.log(data);
+            return res.status(status).json(data);
+        };
+    });
+};
+
+export { getPessoa, getPessoaCache, getPessoaId, getPessoaIdCache, postPessoa };
 // eof
