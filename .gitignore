@@ -1,7 +1,16 @@
+.env
+
+# api
 api/app/node_modules/*
 api/app/package-lock.json
-/api/app/.env
+api/app/.env
+
+# db
 db/mysql/data/*
 db1/postgresql/*
+
+# redis
 redis/data/*
+
+# website
 website/bootstrap-5.3.9-dist/*

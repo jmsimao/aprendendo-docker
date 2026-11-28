@@ -201,21 +201,43 @@ async function deletePessoaId(req, res, next) {
     const connMySQL = await mySQL_db();
     connMySQL.connect(async (err) => {
         if (err == null) {
-            connMySQL.query(sql, [ id ], async (errq, result, fields) => {
+            connMySQL.query(sql, [ id ], (errq, result, fields) => {
                 if (! errq) {
                     if (result.length > 0) {
                         data = result.map((tuple => ({ id: tuple.id, nome: tuple.name})));
+
+                        connMySQL.query(dml, [ id ], (errd, result) => {
+                            if (! errd) {
+
+
+
+                                console.log('Registro eliminado!');
+                                console.log(result);
+                                data = result;
+                            } else {
+                                console.log(errd)
+                                status = 500; data = { 
+                                                codret: -1
+                                                ,mensagem: errd.message
+                                                ,code: errd.code
+                                                ,errno: errd.errno
+                                                ,name: errd.name
+                                                ,sqlState: errd.sqlState
+                                            };
+                            };
+                        });
                     } else {
                         status = 404; data = { 
-                                        codret: -1
+                                        codret: 0
                                         ,mensagem: "Registro não localizado!"
                                         ,id: id 
                                         ,errno: 404
                                         ,name: "Not found"
                                         };
                     };
+                    return res.status(status).json(data);
                 } else {
-                    status = 404; data = { 
+                    status = 500; data = { 
                                         codret: -1
                                         ,mensagem: errq.message
                                         ,code: errq.code
@@ -223,8 +245,8 @@ async function deletePessoaId(req, res, next) {
                                         ,name: errq.name
                                         ,sqlState: errq.sqlState
                                     };
+                    return res.status(status).json(data);            
                 };
-                return res.status(status).json(data);
             });
         } else {
             status = 500; data = { codret: -2, mensagem: mensagem.erroConexao };

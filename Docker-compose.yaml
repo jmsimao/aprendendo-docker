@@ -1,36 +1,38 @@
-name: "docker-introdução"
+name: "docker-introducao"
 
 services:
   database-mysql:
     image: mysql:latest
     container_name: mysql-container-01    
-    restart: no # always
+    restart: unless-stopped # always || no
     environment:
-      - MYSQL_ROOT_PASSWORD=root 
+      - MYSQL_ROOT_PASSWORD=${mysql_root_password}
     volumes:
-      - ".\\db\\mysql\\data:/var/lib/mysql"
+      - "./db/mysql/data:/var/lib/mysql"
     ports:
       - "3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 1m30s
+      interval: 60s
       timeout: 30s
-      retries: 5
+      retries: 3
       start_period: 30s
   
   database-postgres:
     image: postgres:18.7
     container_name: postgres-container-01
-    restart: no
+    restart: unless-stopped
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres 
+      - POSTGRES_USER=${postgres_user}
+      - POSTGRES_PASSWORD=${postgres_password}
+      - PGUSER=${postgres_user}
+      - PGDATA=/var/lib/postgresql/18/docker
     volumes:
-      - ".\\db1\\postgresql\\18\\docker:/var/lib/postgresql/18/docker"
+      - "./db1/postgresql/18/docker:/var/lib/postgresql/18/docker"
     ports: 
       - "5435:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "postgres"]
+      test: ["CMD", "pg_isready", "-d", "${postgres_password}"]
       interval: 60s
       timeout: 30s
       retries: 5
@@ -39,13 +41,14 @@ services:
   db-cache-redis:
     image: redis:8.10
     container_name: redis-container-01
-    restart: no
+    restart: unless-stopped
+    command: redis-server --aclfile user.acl
     volumes:
-      - ".\\redis\\data:/data"
+      - "./redis/data:/data"
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "--user", "${redis_user}", "-a", "${redis_user_password}", "ping"]
       interval: 30s
       timeout: 30s
       retries: 2
@@ -54,10 +57,10 @@ services:
   backend-node:
     image: node:26-slim
     container_name: node-container-01
-    restart: no
+    restart: unless-stopped
     working_dir: /home/node/app
     volumes:
-      - ".\\api\\app:/home/node/app"
+      - "./api/app:/home/node/app"
     ports:
       - "9001:9001"
     command: npm start
@@ -71,12 +74,19 @@ services:
 
   website-php:
     image: php:8.2-apache
+    restart: unless-stopped
     container_name: php-container-01
     working_dir: /var/www/html
     volumes:
-      - ".\\website\\html:/var/www/html"
+      - "./website/html:/var/www/html"
     ports:
       - "8080:80"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
 
 #eof
 ## Caso erro na porta 6379 do redis, execute:
